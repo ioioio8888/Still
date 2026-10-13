@@ -1,0 +1,7 @@
+data
+artifacts
+tests
+.env
+.env.*
+.git
+*.log

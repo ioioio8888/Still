@@ -11,3 +11,6 @@ html[data-language="en"] .brand,html[data-language="en"] .footer-brand{letter-sp
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
 .clear-water{position:absolute;top:20px;right:24px;z-index:2;border-bottom:1px solid var(--line)}.water-space{isolation:isolate}.ink-fallback{background:radial-gradient(ellipse at 40% 45%,#87aaa455,transparent 58%),radial-gradient(ellipse at 65% 65%,#53777f33,transparent 52%)}
+
+/* Latin punctuation uses Latin glyph metrics, even on Chinese Windows. */
+html[data-language="en"]{--sans:Arial,"Helvetica Neue","Microsoft JhengHei",sans-serif}
