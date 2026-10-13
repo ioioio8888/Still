@@ -48,11 +48,15 @@ test('PostgreSQL API preserves ownership, reports, rate limits and Vercel reques
     const created = await call(a, 'letters', 'POST', { body: 'A quiet thought', mood: '想念' });
     assert.equal(created.status, 201);
     const id = created.body.id;
+    assert.equal((await call(a, 'listen')).body.letter, null);
+    assert.equal((await call(b, 'listen')).body.letter.id, id);
+    assert.equal((await call(b, 'listen&exclude=' + id)).body.letter, null);
     assert.equal((await call(b, `letters/${id}`, 'DELETE')).status, 403);
     assert.equal((await call(a, `letters/${id}/reaction`, 'POST', { kind: 'heard' })).status, 400);
     assert.equal((await call(b, `letters/${id}/reaction`, 'POST', { kind: 'light' })).status, 400);
     await Promise.all(Array.from({ length: 3 }, () => call(b, `letters/${id}/reaction`, 'POST', { kind: 'heard' })));
     assert.deepEqual((await call(b)).body.letters[0].reactions, ['heard']);
+    assert.deepEqual((await call(b, 'listen')).body.letter.reactions, ['heard']);
     assert.equal((await call(a, 'letters&mine=1')).body.letters[0].supported, true);
     assert.equal((await call(b, 'letters&mine=1')).body.letters.length, 0);
     assert.equal((await call(b, 'letters&mood=其他')).body.letters.length, 0);
@@ -64,6 +68,7 @@ test('PostgreSQL API preserves ownership, reports, rate limits and Vercel reques
     assert.equal((await call(b)).body.letters.length, 1);
     await Promise.all([c, d].map(client => call(client, `letters/${id}/report`, 'POST', {})));
     assert.equal((await call(b)).body.letters.length, 0);
+    assert.equal((await call(b, 'listen')).body.letter, null);
     assert.equal((await call(a, 'letters&mine=1')).body.letters[0].hidden, 1);
     assert.equal((await call(b, `letters/${id}/reaction`, 'POST', { kind: 'heard' })).status, 404);
     // A fresh function instance must see the same notes and the same IP allowance.

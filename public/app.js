@@ -1,5 +1,6 @@
 import { messages, locales, examples } from './i18n.js';
 import { attachWater } from './water.js';
+import { attachListening } from './listen.js';
 const main = document.querySelector('#main');
 const modal = document.querySelector('#modal');
 const content = document.querySelector('#modal-content');
@@ -89,7 +90,7 @@ function card(letter,sample=false,local=false) {
  return `<article class="letter-card"><div class="card-meta"><span>${escape(moodLabel(letter.mood))}</span><span>${sample?text('sample'):local?text('private'):escape(date)}</span></div><p class="letter-body">${escape(letter.body)}</p><button class="read-letter text-button">${text('read')}${icon.arrow}</button><div class="card-bottom"><span>${local?text('private'):text('stranger')}</span>${sample?`<span>${text('sampleOnly')}</span>`:letter.mine||local?`<button class="text-button delete" data-id="${escape(letter.id)}" data-local="${local}">${text('remove')}</button>`:`<button class="report text-button" data-id="${escape(letter.id)}">${text('report')}</button>`}</div>${letter.mine?`<p class="owner-status">${text(letter.hidden?'hidden':letter.supported?'supported':'savedStatus')}</p>`:!sample&&!local?reaction(letter):''}</article>`;
 }
 async function wall(mine=false,request=generation) {
- main.innerHTML=`<section class="page-heading"><h1>${text(mine?'mine':'wallTitle')}</h1><p>${text(mine?'mineIntro':'wallIntro')}</p></section>${mine?`<p class="storage-note">${text('storage')}</p>`:`<div class="filters" aria-label="${text('filters')}">${canonicalMoods.map((m,i)=>`<button class="filter ${m===filter?'active':''}" aria-pressed="${m===filter}" data-mood="${escape(m)}">${text('m'+i)}</button>`).join('')}</div>`}<section id="letters" class="letters" aria-live="polite" aria-busy="true"><p class="empty">${text('loading')}</p></section><div id="pagination" class="pagination"></div>${mine?`<section class="private-section"><h2>${text('private')}</h2><div id="private-letters" class="letters"></div></section>`:`<p class="wall-end">${text('wallEnd')}</p>`}`;
+ main.innerHTML=`<section class="page-heading">${mine?'':`<a class="archive-back text-button" href="#wall">${text('listenBack')}</a>`}<h1>${text(mine?'mine':'wallTitle')}</h1><p>${text(mine?'mineIntro':'wallIntro')}</p></section>${mine?`<p class="storage-note">${text('storage')}</p>`:`<div class="filters" aria-label="${text('filters')}">${canonicalMoods.map((m,i)=>`<button class="filter ${m===filter?'active':''}" aria-pressed="${m===filter}" data-mood="${escape(m)}">${text('m'+i)}</button>`).join('')}</div>`}<section id="letters" class="letters" aria-live="polite" aria-busy="true"><p class="empty">${text('loading')}</p></section><div id="pagination" class="pagination"></div>${mine?`<section class="private-section"><h2>${text('private')}</h2><div id="private-letters" class="letters"></div></section>`:`<p class="wall-end">${text('wallEnd')}</p>`}`;
  document.querySelectorAll('.filter').forEach(button=>button.onclick=()=>{filter=button.dataset.mood;page=0;wall(false,++generation);});
  if(mine){const letters=privateLetters();document.querySelector('#private-letters').innerHTML=letters.length?letters.map(l=>card(l,false,true)).join(''):`<p class="empty">${text('noPrivate')}</p>`;bindCards();}
  try {
@@ -105,7 +106,7 @@ function bindSupport(root=document) {
   const id=button.dataset.id;
   const matches=()=>[...document.querySelectorAll('.reaction')].filter(b=>b.dataset.id===id);
   matches().forEach(b=>b.disabled=true);
-  try{await api('letters/'+id+'/reaction','POST',{kind:'heard'});matches().forEach(b=>{b.classList.add('selected');b.innerHTML=icon.check+'<span>'+text('heardDone')+'</span>';});toast(t('heardToast'));}
+  try{await api('letters/'+id+'/reaction','POST',{kind:'heard'});matches().forEach(b=>{b.classList.add('selected');b.innerHTML=icon.check+'<span>'+text('heardDone')+'</span>';});button.dispatchEvent(new CustomEvent('heard',{bubbles:true}));toast(t('heardToast'));}
   catch(error){matches().forEach(b=>b.disabled=false);toast(error.message);}
  });
 }
@@ -123,7 +124,7 @@ function bindCards() {
  });
  document.querySelectorAll('.report').forEach(button=>button.onclick=()=>{
   showDialog(()=>`<h2>${text('reportTitle')}</h2><p>${text('reportBody')}</p><button class="button primary" id="confirm-report">${text('reportSend')}</button>`);
-  document.querySelector('#confirm-report').onclick=async event=>{event.currentTarget.disabled=true;setBusy(true);try{await api('letters/'+button.dataset.id+'/report','POST',{});setBusy(false);closeDialog();button.disabled=true;button.textContent=t('reported');toast(t('reportToast'));}catch(error){setBusy(false);document.querySelector('#confirm-report').disabled=false;toast(error.message);}};
+  document.querySelector('#confirm-report').onclick=async event=>{event.currentTarget.disabled=true;setBusy(true);try{await api('letters/'+button.dataset.id+'/report','POST',{});setBusy(false);closeDialog();button.disabled=true;button.textContent=t('reported');toast(t('reportToast'));button.dispatchEvent(new CustomEvent('reported',{bubbles:true}));}catch(error){setBusy(false);document.querySelector('#confirm-report').disabled=false;toast(error.message);}};
  });
 }
 function write() {
@@ -147,9 +148,9 @@ function done(){main.innerHTML=`<section class="done"><div class="settled-mark">
 function route(scroll=true) {
  if(location.hash==='#main'){main.focus();return;}
  cleanupWater();cleanupWater=()=>{};const view=location.hash.slice(1)||'home';++generation;page=0;
- document.body.dataset.view=view;document.querySelector('#motion-toggle').hidden=view!=='home';
- document.querySelectorAll('[data-nav]').forEach(a=>{if(a.dataset.nav===view)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
- if(view==='wall'||view==='mine')wall(view==='mine');else if(view==='write')write();else if(view==='done')done();else home();
+ document.body.dataset.view=view;document.querySelector('#motion-toggle').hidden=view!=='home'&&view!=='wall';
+ document.querySelectorAll('[data-nav]').forEach(a=>{if(a.dataset.nav===view||(view==='archive'&&a.dataset.nav==='wall'))a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
+ if(view==='wall')cleanupWater=attachListening(main,{api,t,escape,icon,reaction,bindCards,moodLabel});else if(view==='archive'||view==='mine')wall(view==='mine');else if(view==='write')write();else if(view==='done')done();else home();
  if(scroll){window.scrollTo(0,0);main.focus({preventScroll:true});}
 }
 window.addEventListener('hashchange',()=>route());window.addEventListener('beforeunload',event=>{if(draft.trim()||busy){event.preventDefault();event.returnValue='';}});

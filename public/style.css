@@ -14,3 +14,36 @@ html[data-language="en"] .brand,html[data-language="en"] .footer-brand{letter-sp
 
 /* Latin punctuation uses Latin glyph metrics, even on Chinese Windows. */
 html[data-language="en"]{--sans:Arial,"Helvetica Neue","Microsoft JhengHei",sans-serif}
+
+/* One quiet page of a letter, with ink moving behind the paper. */
+.listening{position:relative;isolation:isolate;overflow:clip;min-height:700px;padding:28px 0 26px}
+.listen-ink{position:absolute;inset:85px -54px 32px;z-index:-1;pointer-events:none;opacity:.68;overflow:hidden}
+.listen-ink canvas{display:block;width:100%;height:100%;min-height:580px;transform:scaleX(1.65);pointer-events:none}
+.listen-heading{text-align:center;position:relative;margin:0 auto 24px}
+.listen-heading h1{font-size:clamp(26px,3.2vw,39px);line-height:1.5;margin:0 0 8px}
+.listen-heading p{font-size:14px;color:var(--muted);margin:0}
+.listen-stage{max-width:580px;margin:0 auto;position:relative;min-height:480px}
+.listen-card{background:var(--paper);border:1px solid #cad9d1;border-radius:8px 8px 42px 8px;padding:28px 40px 20px;min-height:345px;display:flex;flex-direction:column;box-shadow:0 22px 50px -30px #163f4350;touch-action:pan-y;transform-origin:50% 85%;transition:transform .18s ease-out;cursor:grab}
+.listen-card:focus-visible{outline:2px solid var(--accent);outline-offset:6px}
+.listen-card.dragging{cursor:grabbing;user-select:none;transition:none}
+.listen-meta{display:flex;justify-content:space-between;gap:16px;color:var(--muted);font-size:12px}
+.listen-body{font:28px/1.9 var(--serif);white-space:pre-wrap;overflow-wrap:anywhere;flex:1;display:flex;align-items:center;margin:28px 0;min-height:170px}
+.listen-body.long-note{font-size:22px;line-height:1.85}
+.listen-signature{display:flex;align-items:center;justify-content:space-between;gap:16px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:8px}
+.listen-signature .report{font-size:12px;opacity:.8}
+.listen-actions{display:flex;align-items:stretch;justify-content:center;gap:18px;margin:26px 0 10px}
+.listen-actions .reactions{border:0;padding:0;margin:0}
+.listen-actions .reaction{min-height:52px;padding:12px 24px;background:var(--accent);border:1px solid var(--accent);border-radius:5px;color:var(--paper);font-size:14px;gap:10px}
+.listen-actions .reaction:hover:not(:disabled){background:#1b484d;color:var(--paper)}
+.listen-actions .reaction.selected{background:#dcebe2;color:var(--ink);border-color:#a5bcb0}
+.listen-actions .secondary{background:var(--bg)}
+.listen-hint{text-align:center;font-size:12px;color:var(--muted);margin:12px 0 0}
+.listen-options{width:fit-content;max-width:100%;margin:20px auto 0;font-size:12px;color:var(--muted);text-align:center}
+.listen-options summary{cursor:pointer;min-height:44px;padding:10px}
+.listen-options a{display:block;min-height:44px;padding:8px 16px;text-decoration:underline}
+.listen-rest{text-align:center;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:48px 30px;min-height:360px}
+.listen-rest h2{font-size:29px;margin:16px 0}.listen-rest p{color:var(--muted);max-width:36ch;margin:16px auto 26px}
+.rest-mark .brand-mark{width:58px;height:58px;opacity:.65}
+.listen-loading{text-align:center;padding:150px 20px;color:var(--muted)}
+.archive-back{display:inline-block;margin-bottom:14px}
+@media(max-width:760px){.listening{padding:30px 0 20px;min-height:710px}.listen-heading{margin-bottom:25px}.listen-heading h1{font-size:25px}.listen-heading p{font-size:13px}.listen-ink{inset:75px -20px 40px;opacity:.55}.listen-stage{min-height:480px}.listen-card{padding:22px 25px 16px;min-height:355px;border-bottom-right-radius:32px}.listen-body{font-size:24px;min-height:190px;margin:24px 0}.listen-body.long-note{font-size:20px;line-height:1.8}.listen-actions{gap:12px;margin-top:24px}.listen-actions .reaction{padding:12px 17px}.listen-actions .button{padding:12px 17px;gap:12px}.listen-hint{font-size:11px}.listen-options{margin-top:10px}}

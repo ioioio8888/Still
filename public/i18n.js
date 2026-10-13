@@ -1,6 +1,19 @@
 // Message bodies are never translated. These dictionaries cover interface copy only.
 export const locales = { yue: 'zh-HK', zh: 'zh-Hant', en: 'en' };
 const rows = [
+ ['listenTitle','留一刻, 聽一段心事','留一刻, 聆聽一段心事','A moment for someone\'s words'],
+ ['listenIntro','唔使急住睇下一段, 慢慢讀就好','不必急著看下一段, 慢慢讀就好','There is no hurry to move on. Take your time.'],
+ ['listenNext','下一段心事','下一段心事','Another story'],
+ ['listenHint','左右滑動換下一段, 或按下面嘅按鈕','左右滑動切換下一段, 或按下方按鈕','Swipe either way, or use the button below'],
+ ['listenCard','一位陌生人嘅心事','一位陌生人的心事','A stranger\'s words'],
+ ['listenEnd','先聽到呢度','先聽到這裡','A little pause'],
+ ['listenEndBody','暫時未有其他未讀心事, 可以休息一陣, 或重新遇見之前嘅文字','暫時沒有其他未讀心事, 可以休息一會, 或重新遇見之前的文字','There are no more unread notes right now. Rest a little, or revisit the words you have read.'],
+ ['listenAgain','重新遇見','重新遇見','Read again'],
+ ['listenEmpty','呢度正等緊第一段心事','這裡正等待第一段心事','Waiting for the first words'],
+ ['listenEmptyBody','你可以先留低自己嘅心事, 或遲啲再返嚟聽','你可以先寫下自己的心事, 或稍後回來聆聽','Leave a note of your own, or come back to listen later.'],
+ ['listenArchive','瀏覽所有心事','瀏覽所有心事','Browse all notes'],
+ ['listenOptions','其他閱讀方式','其他閱讀方式','More ways to read'],
+ ['listenBack','返回逐段聆聽','返回逐段聆聽','Back to one story at a time'],
  ['clearWater','洗去墨跡','洗去墨跡','Wash away'],
  ['waterUnavailable','此裝置暫不支援墨流','此裝置暫不支援墨流','Ink effects unavailable on this device'],
  ['policy','一齊留住呢度嘅安靜。請勿發佈政治相關內容、人身攻擊、威脅或宣傳連結。','一起守護這裡的安靜。請勿發佈政治相關內容、人身攻擊、威脅或宣傳連結。','Help keep this a quiet, caring space. Please leave out political content, personal attacks, threats and promotional links.'],

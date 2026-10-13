@@ -5,11 +5,13 @@ import { mkdirSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { moderate } from './moderation.mjs';
+import { excludedIds, listeningRank } from './lib/listening.mjs';
 
 const root = dirname(fileURLToPath(import.meta.url));
 export function createApp(dbPath = resolve(root, 'data/letters.sqlite')) {
   mkdirSync(dirname(dbPath), { recursive: true });
   const db = new DatabaseSync(dbPath);
+  db.function('listening_rank', created => listeningRank(created));
   db.exec(`PRAGMA journal_mode=WAL;
     CREATE TABLE IF NOT EXISTS letters (id TEXT PRIMARY KEY, owner TEXT NOT NULL, body TEXT NOT NULL, mood TEXT NOT NULL, created INTEGER NOT NULL, hidden INTEGER NOT NULL DEFAULT 0);
     CREATE TABLE IF NOT EXISTS reactions (letter TEXT, owner TEXT, kind TEXT, PRIMARY KEY(letter,owner,kind));
@@ -21,7 +23,7 @@ export function createApp(dbPath = resolve(root, 'data/letters.sqlite')) {
     try {
       const url = new URL(req.url, 'http://localhost');
       if (!url.pathname.startsWith('/api/')) {
-        const files = { '/': ['index.html','text/html'], '/app.js': ['app.js','text/javascript'], '/i18n.js': ['i18n.js','text/javascript'], '/water.js': ['water.js','text/javascript'], '/style.css': ['style.css','text/css'], '/logo.png': ['logo.png','image/png'], '/favicon.svg': ['favicon.svg','image/svg+xml'] };
+        const files = { '/': ['index.html','text/html'], '/app.js': ['app.js','text/javascript'], '/i18n.js': ['i18n.js','text/javascript'], '/water.js': ['water.js','text/javascript'], '/listen.js': ['listen.js','text/javascript'], '/style.css': ['style.css','text/css'], '/logo.png': ['logo.png','image/png'], '/favicon.svg': ['favicon.svg','image/svg+xml'] };
         const file = files[url.pathname];
         if (!file || req.method !== 'GET') return json(404, { error: '找不到這個頁面。' });
         res.writeHead(200, { ...headers, 'Content-Type': file[1] + '; charset=utf-8' });
@@ -43,6 +45,12 @@ export function createApp(dbPath = resolve(root, 'data/letters.sqlite')) {
         for await (const part of req) { size += part.length; if (size > 20000) return json(413, { error: '文字太長了，請縮短至 200 字。' }); raw += part; }
         try { input = JSON.parse(raw); } catch { return json(400, { error: '資料格式有誤。' }); }
         if (!input || typeof input !== 'object' || Array.isArray(input)) return json(400, { error: '資料格式有誤。' });
+      }
+      if (req.method === 'GET' && url.pathname === '/api/listen') {
+        const excluded = excludedIds(url.searchParams.get('exclude') || '');
+        const row = db.prepare(`SELECT id, body, mood, created FROM letters WHERE hidden = 0 AND owner <> ? ${excluded.length ? `AND id NOT IN (${excluded.map(() => '?').join(',')})` : ''} ORDER BY listening_rank(created) LIMIT 1`).get(owner, ...excluded);
+        if (row) row.reactions = db.prepare('SELECT kind FROM reactions WHERE letter = ? AND owner = ?').all(row.id, owner).map(r => r.kind);
+        return json(200, { letter: row || null });
       }
       if (req.method === 'GET' && url.pathname === '/api/letters') {
         const mine = url.searchParams.get('mine') === '1';
