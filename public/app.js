@@ -1,4 +1,4 @@
-import { messages, locales, examples } from './i18n.js';
+import { messages, locales, examples, resolveLanguage } from './i18n.js';
 import { attachWater } from './water.js';
 import { attachListening } from './listen.js';
 const main = document.querySelector('#main');
@@ -6,7 +6,7 @@ const modal = document.querySelector('#modal');
 const content = document.querySelector('#modal-content');
 const canonicalMoods = ['', '未說出口', '有點疲累', '想念', '慢慢放下', '其他'];
 const readPreference = key => { try { return localStorage.getItem(key); } catch { return null; } };
-let language = Object.hasOwn(messages, readPreference('still-language')) ? readPreference('still-language') : 'yue';
+let language = resolveLanguage(readPreference('still-language'), navigator.languages?.length ? navigator.languages : [navigator.language]);
 let filter = '', page = 0, generation = 0, draft = '', draftMood = '未說出口', draftVisibility = 'public';
 let toastTimer, cleanupWater = () => {}, busy = false, openDialog = null;
 const t = key => messages[language][key] || key;

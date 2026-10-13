@@ -141,3 +141,16 @@ export const examples = {
  zh: ['其實那天，我是想向你道謝。\n\n謝謝你在我不知道如何繼續前行時，靜靜坐在我身旁。那份安靜，我一直記得。','今天沒有發生什麼大事，只是有些疲憊。\n\n想給自己一個晚上，不必做到最好。吃一碗熱麵，早點休息。','走過以前一起等車的地方，才發現有些日常，原來會想念那麼久。\n\n希望你正度過平凡而安心的一天。'],
  en: ['That day, I wanted to say thank you.\n\nYou sat beside me when I didn\'t know how to keep going. I still remember the kindness of that silence.','Nothing really happened today. I\'m just tired.\n\nTonight, I want to let myself do a little less. A warm bowl of noodles. An early night.','I passed the place where we used to wait for the bus. Funny how the ordinary things stay with us.\n\nI hope your day is a quiet, comfortable one.']
 };
+
+// Honour an explicit choice; otherwise use the browser's ordered language list.
+export function resolveLanguage(saved, preferred = []) {
+ if (['yue', 'zh', 'en'].includes(saved)) return saved;
+ for (const value of preferred) {
+  if (typeof value !== 'string') continue;
+  const parts = value.toLowerCase().replaceAll('_', '-').split('-');
+  if (parts[0] === 'yue') return 'yue';
+  if (parts[0] === 'zh') return parts.includes('hk') ? 'yue' : 'zh';
+  if (parts[0] === 'en') return 'en';
+ }
+ return 'en';
+}
