@@ -1,0 +1,10 @@
+node_modules/
+data/
+*.log
+.env
+.env.*
+!.env.example
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+artifacts/*.png

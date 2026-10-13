@@ -1,0 +1,4 @@
+Generated with the built-in image generation tool. Final asset: public/logo.png.
+
+Prompt:
+Use case: logo-brand. Create one finished, beautifully restrained logo SYMBOL ONLY for a quiet anonymous emotional journaling website. Feeling: peace, a soft exhale, being gently held, putting down a burden. An abstract resting leaf cradled by one fluid crescent of water, inspired by Japanese suminagashi ink and smooth river stones. Two simple organic, rounded, elegantly balanced shapes with meaningful open negative space. Sophisticated minimal editorial brand identity. Flat solid deep muted teal #275d60, subtly organic contours, clean crisp edges, legible at 32px. Square composition, symbol fills 85% of frame, centered. Genuine transparent background. No text, no letters, no gradients, no shadows, no mockup, no border, no lamp, no heart, no lotus, no concentric ripple diagram. One cohesive symbol only.

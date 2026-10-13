@@ -1,0 +1,8 @@
+{
+  "politicalTerms": ["政治", "政黨", "政党", "政權", "政权", "政客", "選舉", "选举", "拉票", "公投", "總統", "总统", "首相", "總理", "总理", "特首", "議員", "议员", "國會", "国会", "立法會", "立法会", "共產黨", "共产党", "國民黨", "国民党", "民進黨", "民进党", "民主黨", "民主党", "共和黨", "共和党", "共產主義", "共产主义", "社會主義", "社会主义", "法西斯", "台獨", "台独", "港獨", "港独", "統獨", "统独", "政變", "政变", "六四", "反送中", "一國兩制", "一国两制"],
+  "politicalEnglish": ["politics", "political", "politician", "politicians", "election", "elections", "electoral", "vote for", "referendum", "parliament", "president", "prime minister", "senator", "congress", "democratic party", "republican party", "communist party", "communism", "socialism", "fascism", "independence movement", "regime", "CCP", "DPP", "KMT"],
+  "abusiveTerms": ["屌你", "屌你老母", "你去死", "去死啦", "死全家", "操你媽", "操你妈", "殺死你", "杀死你"],
+  "abusiveEnglish": ["fuck you", "kill yourself", "i will kill you"],
+  "blockLinks": true,
+  "maxRepeatedCharacter": 20
+}
