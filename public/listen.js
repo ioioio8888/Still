@@ -34,29 +34,40 @@ export function attachListening(main, { api, t, escape, icon, reaction, bindCard
     };
     card.onpointerdown = event => {
       if (event.target.closest('button') || !event.isPrimary || event.button !== 0 || loading || moving) return;
-      drag = { id: event.pointerId, x: event.clientX, y: event.clientY, active: false };
+      const mouse = event.pointerType === 'mouse';
+      drag = { id: event.pointerId, x: event.clientX, y: event.clientY, active: mouse };
+      if (mouse) {
+        event.preventDefault(); card.focus({ preventScroll: true });
+        card.setPointerCapture(event.pointerId); card.classList.add('dragging');
+      }
     };
     card.onpointermove = event => {
       if (!drag || event.pointerId !== drag.id) return;
       const dx = event.clientX - drag.x, dy = event.clientY - drag.y;
       if (!drag.active && Math.abs(dy) > 16 && Math.abs(dy) > Math.abs(dx)) { drag = null; return; }
-      if (!drag.active && Math.abs(dx) > 18 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+      if (!drag.active && Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy) * 1.4) {
         drag.active = true; card.setPointerCapture(event.pointerId); card.classList.add('dragging');
       }
-      if (drag.active && !reduced()) {
-        card.style.transform = `translateX(${dx * .7}px) rotate(${Math.max(-7, Math.min(7, dx / 40))}deg)`;
+      if (drag.active) {
+        // Direct manipulation stays visible with reduced motion; only tilt and inertia are removed.
+        card.style.transform = `translate(${dx}px, ${reduced() ? 0 : dy * .12}px) rotate(${reduced() ? 0 : Math.max(-9, Math.min(9, dx / 32))}deg)`;
       }
     };
     function release(event, cancelled = false) {
       if (!drag || event.pointerId !== drag.id) return;
       const dx = event.clientX - drag.x;
       const shouldAdvance = !cancelled && drag.active && Math.abs(dx) > Math.min(95, card.clientWidth * .22);
-      drag = null; card.classList.remove('dragging'); card.style.transform = '';
+      drag = null; card.classList.remove('dragging');
       if (card.hasPointerCapture(event.pointerId)) card.releasePointerCapture(event.pointerId);
       if (shouldAdvance) advance(Math.sign(dx));
+      else card.style.transform = '';
     }
     card.onpointerup = event => release(event);
     card.onpointercancel = event => release(event, true);
+    card.onlostpointercapture = () => {
+      if (drag) { drag = null; card.classList.remove('dragging'); card.style.transform = ''; }
+    };
+    card.ondragstart = event => event.preventDefault();
     card.onpointerleave = () => { if (drag && !drag.active) drag = null; };
     if (focus) card.focus({ preventScroll: true });
   }
@@ -92,7 +103,8 @@ export function attachListening(main, { api, t, escape, icon, reaction, bindCard
     const card = stage.querySelector('.listen-card');
     stage.querySelectorAll('.listen-actions button').forEach(button => button.disabled = true);
     if (card && !reduced()) {
-      await card.animate([{ opacity: 1, transform: 'translateX(0) rotate(0)' }, { opacity: 0, transform: `translateX(${direction * 130}px) rotate(${direction * 5}deg)` }], { duration: 230, easing: 'ease-in', fill: 'forwards' }).finished.catch(() => {});
+      const start = card.style.transform || 'translateX(0) rotate(0)';
+      await card.animate([{ opacity: 1, transform: start }, { opacity: 0, transform: `translateX(${direction * (card.clientWidth + 100)}px) rotate(${direction * 12}deg)` }], { duration: 230, easing: 'ease-in', fill: 'forwards' }).finished.catch(() => {});
     }
     moving = false;
     if (disposed) return;
