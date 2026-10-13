@@ -30,7 +30,7 @@ test('mouse follows each move even without pointer capture and with reduced moti
   cleanup(); emit('pointermove', 700); assert.equal(card.style.transform, '');
 });
 
-test('only a deliberate drag past 65% advances, in either direction', () => {
+test('only a deliberate drag past 50% advances, in either direction', () => {
   for (const width of [320, 580]) for (const direction of [-1, 1]) {
     const { emit, calls, cleanup } = setup({ width });
     emit('pointerdown', 0); emit('pointermove', direction * (swipeThreshold(width) - 1)); emit('pointerup', direction * (swipeThreshold(width) - 1));

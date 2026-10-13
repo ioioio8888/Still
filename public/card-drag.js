@@ -1,4 +1,4 @@
-export const swipeThreshold = width => width * .65;
+export const swipeThreshold = width => width * .5;
 
 export function attachCardDrag(card, { next, blocked, reduced, target = window }) {
   let drag = null;
