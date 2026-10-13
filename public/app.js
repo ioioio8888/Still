@@ -1,4 +1,4 @@
-import { messages, locales, examples, resolveLanguage } from './i18n.js';
+import { messages, locales, examples, resolveLanguage, languageUrl } from './i18n.js';
 import { attachWater } from './water.js';
 import { attachListening } from './listen.js';
 const main = document.querySelector('#main');
@@ -6,7 +6,7 @@ const modal = document.querySelector('#modal');
 const content = document.querySelector('#modal-content');
 const canonicalMoods = ['', '未說出口', '有點疲累', '想念', '慢慢放下', '其他'];
 const readPreference = key => { try { return localStorage.getItem(key); } catch { return null; } };
-let language = resolveLanguage(readPreference('still-language'), navigator.languages?.length ? navigator.languages : [navigator.language]);
+let language = resolveLanguage(readPreference('still-language'), navigator.languages?.length ? navigator.languages : [navigator.language], location.search);
 let filter = '', page = 0, generation = 0, draft = '', draftMood = '未說出口', draftVisibility = 'public';
 let toastTimer, cleanupWater = () => {}, busy = false, openDialog = null;
 const t = key => messages[language][key] || key;
@@ -73,6 +73,7 @@ function shell() {
 }
 document.querySelector('#language').onchange=event=>{
  language=event.target.value;try{localStorage.setItem('still-language',language);}catch{}
+ history.replaceState(history.state, '', languageUrl(location.href, language));
  // Re-render interface only. Writing state and original message bodies remain intact.
  if(modal.open)closeDialog();document.querySelector('#toast').classList.remove('visible');shell();route(false);
 };

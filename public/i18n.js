@@ -143,7 +143,10 @@ export const examples = {
 };
 
 // Honour an explicit choice; otherwise use the browser's ordered language list.
-export function resolveLanguage(saved, preferred = []) {
+export function resolveLanguage(saved, preferred = [], search = '') {
+ const requested = new URLSearchParams(search).get('lang')?.toLowerCase().replaceAll('_', '-');
+ const aliases = { yue: 'yue', 'zh-hk': 'yue', zh: 'zh', 'zh-tw': 'zh', 'zh-hant': 'zh', en: 'en' };
+ if (Object.hasOwn(aliases, requested)) return aliases[requested];
  if (['yue', 'zh', 'en'].includes(saved)) return saved;
  for (const value of preferred) {
   if (typeof value !== 'string') continue;
@@ -153,4 +156,10 @@ export function resolveLanguage(saved, preferred = []) {
   if (parts[0] === 'en') return 'en';
  }
  return 'en';
+}
+
+export function languageUrl(href, language) {
+ const url = new URL(href);
+ if (Object.hasOwn(locales, language)) url.searchParams.set('lang', language);
+ return url.href;
 }
