@@ -1,9 +1,10 @@
 import { attachWater } from './water.js';
+import { attachCardDrag } from './card-drag.js';
 
 const session = { current: null, seen: [] };
 
 export function attachListening(main, { api, t, escape, icon, reaction, bindCards, moodLabel }) {
-  let disposed = false, loading = false, moving = false, drag = null;
+  let disposed = false, loading = false, moving = false, cleanupDrag = () => {};
   const tr = key => escape(t(key));
   main.innerHTML = `<section class="listening"><div class="listen-ink" aria-hidden="true"><canvas id="listen-water" tabindex="-1"></canvas></div>
     <header class="listen-heading"><h1>${tr('listenTitle')}</h1><p>${tr('listenIntro')}</p></header>
@@ -32,43 +33,8 @@ export function attachListening(main, { api, t, escape, icon, reaction, bindCard
       if (event.target !== card || !['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
       event.preventDefault(); advance(event.key === 'ArrowLeft' ? -1 : 1);
     };
-    card.onpointerdown = event => {
-      if (event.target.closest('button') || !event.isPrimary || event.button !== 0 || loading || moving) return;
-      const mouse = event.pointerType === 'mouse';
-      drag = { id: event.pointerId, x: event.clientX, y: event.clientY, active: mouse };
-      if (mouse) {
-        event.preventDefault(); card.focus({ preventScroll: true });
-        card.setPointerCapture(event.pointerId); card.classList.add('dragging');
-      }
-    };
-    card.onpointermove = event => {
-      if (!drag || event.pointerId !== drag.id) return;
-      const dx = event.clientX - drag.x, dy = event.clientY - drag.y;
-      if (!drag.active && Math.abs(dy) > 16 && Math.abs(dy) > Math.abs(dx)) { drag = null; return; }
-      if (!drag.active && Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy) * 1.4) {
-        drag.active = true; card.setPointerCapture(event.pointerId); card.classList.add('dragging');
-      }
-      if (drag.active) {
-        // Direct manipulation stays visible with reduced motion; only tilt and inertia are removed.
-        card.style.transform = `translate(${dx}px, ${reduced() ? 0 : dy * .12}px) rotate(${reduced() ? 0 : Math.max(-9, Math.min(9, dx / 32))}deg)`;
-      }
-    };
-    function release(event, cancelled = false) {
-      if (!drag || event.pointerId !== drag.id) return;
-      const dx = event.clientX - drag.x;
-      const shouldAdvance = !cancelled && drag.active && Math.abs(dx) > Math.min(95, card.clientWidth * .22);
-      drag = null; card.classList.remove('dragging');
-      if (card.hasPointerCapture(event.pointerId)) card.releasePointerCapture(event.pointerId);
-      if (shouldAdvance) advance(Math.sign(dx));
-      else card.style.transform = '';
-    }
-    card.onpointerup = event => release(event);
-    card.onpointercancel = event => release(event, true);
-    card.onlostpointercapture = () => {
-      if (drag) { drag = null; card.classList.remove('dragging'); card.style.transform = ''; }
-    };
-    card.ondragstart = event => event.preventDefault();
-    card.onpointerleave = () => { if (drag && !drag.active) drag = null; };
+    cleanupDrag();
+    cleanupDrag = attachCardDrag(card, { next: advance, blocked: () => loading || moving || disposed, reduced });
     if (focus) card.focus({ preventScroll: true });
   }
   function empty() {
@@ -79,6 +45,7 @@ export function attachListening(main, { api, t, escape, icon, reaction, bindCard
   }
   async function fetchNext(focus = false) {
     if (loading || disposed) return;
+    cleanupDrag(); cleanupDrag = () => {};
     loading = true; stage.setAttribute('aria-busy', 'true');
     stage.innerHTML = `<p class="listen-loading">${tr('loading')}</p>`;
     try {
@@ -117,5 +84,5 @@ export function attachListening(main, { api, t, escape, icon, reaction, bindCard
     if (session.current?.id === event.target.dataset.id) advance(1);
   });
   if (session.current) render(); else fetchNext();
-  return () => { disposed = true; drag = null; stopWater(); };
+  return () => { disposed = true; cleanupDrag(); stopWater(); };
 }

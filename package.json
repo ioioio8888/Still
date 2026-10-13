@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node server.mjs",
     "test": "node --test tests/*.test.mjs",
-    "check": "node --check server.mjs && node --check moderation.mjs && node --check public/app.js && node --check public/i18n.js && node --check public/water.js && node --check lib/api.mjs && node --check lib/neon.mjs && node --check api/handler.js && node --check scripts/migrate.mjs && node --check public/listen.js && node --check lib/listening.mjs",
+    "check": "node --check server.mjs && node --check moderation.mjs && node --check public/app.js && node --check public/i18n.js && node --check public/water.js && node --check lib/api.mjs && node --check lib/neon.mjs && node --check api/handler.js && node --check scripts/migrate.mjs && node --check public/listen.js && node --check lib/listening.mjs && node --check public/card-drag.js",
     "build": "npm run check && npm run db:migrate",
     "db:migrate": "node --env-file-if-exists=.env scripts/migrate.mjs"
   },

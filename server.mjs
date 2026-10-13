@@ -23,7 +23,7 @@ export function createApp(dbPath = resolve(root, 'data/letters.sqlite')) {
     try {
       const url = new URL(req.url, 'http://localhost');
       if (!url.pathname.startsWith('/api/')) {
-        const files = { '/': ['index.html','text/html'], '/app.js': ['app.js','text/javascript'], '/i18n.js': ['i18n.js','text/javascript'], '/water.js': ['water.js','text/javascript'], '/listen.js': ['listen.js','text/javascript'], '/style.css': ['style.css','text/css'], '/logo.png': ['logo.png','image/png'], '/favicon.svg': ['favicon.svg','image/svg+xml'] };
+        const files = { '/': ['index.html','text/html'], '/app.js': ['app.js','text/javascript'], '/i18n.js': ['i18n.js','text/javascript'], '/water.js': ['water.js','text/javascript'], '/listen.js': ['listen.js','text/javascript'], '/card-drag.js': ['card-drag.js','text/javascript'], '/style.css': ['style.css','text/css'], '/logo.png': ['logo.png','image/png'], '/favicon.svg': ['favicon.svg','image/svg+xml'] };
         const file = files[url.pathname];
         if (!file || req.method !== 'GET') return json(404, { error: '找不到這個頁面。' });
         res.writeHead(200, { ...headers, 'Content-Type': file[1] + '; charset=utf-8' });
