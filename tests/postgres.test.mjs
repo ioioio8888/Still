@@ -89,8 +89,32 @@ test('PostgreSQL API preserves ownership, reports, rate limits and Vercel reques
       setHeader() {}, writeHead(code) { status = code; }, end(body) { result = JSON.parse(body); }
     });
     assert.equal(status, 201); assert.match(result.id, /^[a-f0-9]{32}$/);
+    const boundary = 'abcdefghij'.repeat(20);
+    assert.equal((await call(a, 'letters', 'POST', { body: boundary, mood: '其他' })).status, 201);
+    assert.equal((await call(a, 'letters', 'POST', { body: boundary + 'x', mood: '其他' })).status, 400);
+    const injection = "a'); DROP TABLE letters; --";
+    assert.equal((await call(a, 'letters', 'POST', { body: injection, mood: '其他' })).status, 201);
+    assert.ok((await db.query('SELECT body FROM letters WHERE body = $1', [injection])).length);
+    assert.equal((await call(b, 'letters&mood=' + encodeURIComponent("' OR 1=1 --"))).body.letters.length, 0);
   } finally {
     await new Promise(resolve => server.close(resolve));
     await pg.close();
   }
+});
+
+test('200-character migration preserves legacy notes and guards direct database writes', async () => {
+  const pg = new PGlite();
+  try {
+    await pg.exec(`CREATE TABLE letters (id TEXT PRIMARY KEY, owner TEXT NOT NULL, body TEXT NOT NULL CHECK (char_length(body) BETWEEN 1 AND 3000), mood TEXT NOT NULL, created BIGINT NOT NULL, hidden INTEGER NOT NULL DEFAULT 0)`);
+    await pg.query('INSERT INTO letters VALUES ($1,$2,$3,$4,$5,0)', ['old', 'owner', 'x'.repeat(201), '其他', 1]);
+    const schema = readFileSync(new URL('../db/schema.sql', import.meta.url), 'utf8');
+    for (let run = 0; run < 2; run++) await pg.transaction(async tx => {
+      for (const statement of schema.split('-- statement-breakpoint').filter(s => s.trim())) await tx.query(statement);
+    });
+    assert.equal((await pg.query('SELECT body FROM letters')).rows[0].body.length, 201);
+    await pg.query('UPDATE letters SET hidden = 1 WHERE id = $1', ['old']);
+    await assert.rejects(pg.query('UPDATE letters SET body = $1 WHERE id = $2', ['x'.repeat(201), 'old']), { code: '23514' });
+    await pg.query('UPDATE letters SET body = $1 WHERE id = $2', ['x'.repeat(200), 'old']);
+    await assert.rejects(pg.query('INSERT INTO letters VALUES ($1,$2,$3,$4,$5,0)', ['new', 'owner', 'x'.repeat(201), '其他', 2]), { code: '23514' });
+  } finally { await pg.close(); }
 });

@@ -20,7 +20,7 @@ test('anonymous letters persist, isolate ownership, accept support, paginate and
   for(const c of clients)assert.equal((await call(c,'letters')).status,200);
   const [alice,bob,charlie,dana]=clients;
   assert.equal((await call(alice,'letters','POST',{body:' ',mood:'其他'})).status,400);
-  assert.equal((await call(alice,'letters','POST',{body:'x'.repeat(3001),mood:'其他'})).status,400);
+  assert.equal((await call(alice,'letters','POST',{body:'x'.repeat(201),mood:'其他'})).status,400);
   assert.equal((await call(alice,'letters','POST',null)).status,400);
   assert.equal((await call(alice,'letters','POST',{body:'no',mood:'其他'},{Origin:'https://foreign.example'})).status,403);
   assert.equal((await call(alice,'letters','POST',{body:'p.o.l.i.t.i.c.s',mood:'其他'})).status,422);
@@ -48,5 +48,12 @@ test('anonymous letters persist, isolate ownership, accept support, paginate and
   assert.equal((await call(alice,'letters?mine=1')).body.letters.length,9);
   assert.equal((await call(alice,`letters/${id}`,'DELETE')).status,200);
   assert.equal((await call(alice,`letters/${id}`,'DELETE')).status,404);
+  const boundary='abcdefghij'.repeat(20);
+  assert.equal((await call(alice,'letters','POST',{body:boundary,mood:'其他'})).status,201);
+  assert.equal((await call(alice,'letters','POST',{body:boundary+'x',mood:'其他'})).status,400);
+  const injection="a'); DROP TABLE letters; --";
+  assert.equal((await call(alice,'letters','POST',{body:injection,mood:'其他'})).status,201);
+  assert.equal((await call(bob,'letters?mood='+encodeURIComponent("' OR 1=1 --"))).body.letters.length,0);
+  assert.ok((await call(alice,'letters?mine=1')).body.letters.some(l=>l.body===injection));
  } finally {await new Promise(resolve=>server.close(resolve));rmSync(directory,{recursive:true,force:true});}
 });

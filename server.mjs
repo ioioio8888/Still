@@ -40,7 +40,7 @@ export function createApp(dbPath = resolve(root, 'data/letters.sqlite')) {
       let input = {};
       if (req.method === 'POST') {
         let raw = ''; let size = 0;
-        for await (const part of req) { size += part.length; if (size > 20000) return json(413, { error: '文字太長了，請縮短至 3000 字。' }); raw += part; }
+        for await (const part of req) { size += part.length; if (size > 20000) return json(413, { error: '文字太長了，請縮短至 200 字。' }); raw += part; }
         try { input = JSON.parse(raw); } catch { return json(400, { error: '資料格式有誤。' }); }
         if (!input || typeof input !== 'object' || Array.isArray(input)) return json(400, { error: '資料格式有誤。' });
       }
@@ -54,7 +54,7 @@ export function createApp(dbPath = resolve(root, 'data/letters.sqlite')) {
       }
       if (req.method === 'POST' && url.pathname === '/api/letters') {
         const body = typeof input.body === 'string' ? input.body.trim() : '';
-        if (!body || body.length > 3000) return json(400, { error: '請寫低 1 至 3000 字嘅心事。' });
+        if (!body || body.length > 200) return json(400, { error: '請寫低 1 至 200 字嘅心事。' });
         if (!['未說出口','有點疲累','想念','慢慢放下','其他'].includes(input.mood)) return json(400, { error: '請選擇一個分類。' });
         const violation = moderate(body);
         if (violation) return json(422, { code: violation, error: '內容不符合公開留言規則。' });

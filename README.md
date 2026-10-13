@@ -13,7 +13,7 @@ Open http://localhost:3000. Run `npm test` for the isolated API integration test
 
 ## Features
 
-- Free writing with preview before publishing; optional mood tags.
+- Writing up to 200 characters with preview before publishing; optional mood tags. Spaces and line breaks count toward the browser/API limit (UTF-16 units). Existing longer notes are preserved; the PostgreSQL migration enforces the new limit on inserts and body edits without preventing legacy notes from being hidden or deleted.
 - Anonymous public wall with filters and pagination.
 - “我聽到了” / “I hear you” as the only support reaction, with duplicate prevention and no public counts.
 - Colloquial Traditional Chinese, written Traditional Chinese and English UI, remembered per browser. Language changes preserve drafts and visibility; message bodies are never machine translated.
