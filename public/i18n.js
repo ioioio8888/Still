@@ -131,7 +131,7 @@ const rows = [
  ['error403','未能完成操作。請使用原本嘅瀏覽器再試。','無法完成操作。請使用原本的瀏覽器重試。','This action isn\'t allowed. Try the browser you used originally.'],
  ['error404','呢段心事已經收起，請重新整理。','這段心事已移除，請重新整理。','This note is no longer available. Please refresh.'],
  ['error413','文字太長了，請縮短至 200 字。','文字過長，請縮短至 200 個字元。','This note is too long. Please keep it under 200 characters.'],
- ['error429','暫時寫得太密，請稍後再試。','提交過於頻繁，請稍後重試。','You\'ve sent several notes recently. Please try again later.'],
+ ['error429','操作太密，請休息一陣再試。','操作過於頻繁，請稍後重試。','Too many requests. Please pause and try again later.'],
  ['errorGeneric','暫時未能完成，請稍後再試。','暫時無法完成，請稍後重試。','We couldn\'t finish that. Please try again in a moment.'],
  ['storageError','瀏覽器未能保存。請保留文字，再檢查儲存空間或私隱設定。','瀏覽器無法儲存。請保留文字，再檢查儲存空間或隱私設定。','Your browser couldn\'t save this. Keep a copy and check storage or privacy settings.']
 ];

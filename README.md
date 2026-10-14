@@ -24,6 +24,14 @@ Open http://localhost:3000. Run `npm test` for the isolated API integration test
 - Responsive layout, keyboard focus, reduced-motion support, accessible dialog.
 - Empty wall shows clearly labeled illustrative examples, never fabricated activity.
 
+## Request abuse protection
+
+Both API implementations apply admission control before reading bodies or querying the database: each IP gets a fixed 60-second window of 180 total API requests, including at most 60 write requests (POST/DELETE). Each process admits at most 32 simultaneous API requests and tracks at most 10,000 IP buckets. Saturation returns 503; per-IP excess returns 429; both include `Retry-After`. Expired buckets are pruned, and live limits are never evicted to make room for new addresses. IPs are held as salted hashes in admission-control memory, not logged. Vercel uses only its overwritten `x-vercel-forwarded-for`; local mode uses the socket address and ignores forwarded headers. Unsupported API routes/methods and URLs over 8 KiB are rejected before database access. The existing shared PostgreSQL limit of 20 published notes/hour/IP remains in force. The local server additionally caps body/header receipt time and bounds its hourly posting-limit map.
+
+These in-memory counters and concurrency ceilings apply **per process** and reset on cold starts; they do not enforce a global allowance across Vercel instances. They reduce application/database work, but do not replace edge-level DDoS mitigation or prevent all invocation costs. Static files stay outside the application limiter so normal page asset loading is unaffected.
+
+For production, configure the existing Vercel project **still** → **Firewall** → **Configure** → **New Rule**: match request paths starting with `/api/`, rate limit by IP using a fixed 60-second window and 180 requests, and return 429. Review and publish the rule, then monitor shared-network false positives. The prefix also covers direct `/api/handler` requests. This WAF configuration is **not applied by these repository files**. Vercel has platform DDoS mitigation; custom WAF rate limiting must be configured in the project dashboard. See [Vercel DDoS mitigation](https://vercel.com/docs/vercel-firewall/ddos-mitigation) and [WAF rate limiting](https://vercel.com/docs/vercel-firewall/vercel-waf/rate-limiting).
+
 ## Storage and anonymity
 
 Public records use SQLite in `data/letters.sqlite`; preserve this directory across restarts. The server stores a hash of a random HttpOnly, SameSite=Strict cookie as the owner identity, not names or accounts. Clearing the cookie loses ownership access. Private notes use localStorage only and are accessible to anyone using that browser profile. They are not encrypted or backed up and are lost when browser storage is cleared. Drafts remain in memory during navigation and warn before closing an unfinished page.

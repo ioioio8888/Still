@@ -6,6 +6,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { moderate } from './moderation.mjs';
 import { excludedIds, listeningRank } from './lib/listening.mjs';
+import { createRequestGuard, clientAddress, allowedApiMethod } from './lib/request-guard.mjs';
 
 const root = dirname(fileURLToPath(import.meta.url));
 export function createApp(dbPath = resolve(root, 'data/letters.sqlite')) {
@@ -17,10 +18,14 @@ export function createApp(dbPath = resolve(root, 'data/letters.sqlite')) {
     CREATE TABLE IF NOT EXISTS reactions (letter TEXT, owner TEXT, kind TEXT, PRIMARY KEY(letter,owner,kind));
     CREATE TABLE IF NOT EXISTS reports (letter TEXT, owner TEXT, PRIMARY KEY(letter,owner));`);
   const limits = new Map();
+  let lastWriteSweep = 0;
+  const admit = createRequestGuard();
   const server = http.createServer(async (req, res) => {
+    let release = () => {};
     const headers = { 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer', 'Content-Security-Policy': "default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'; form-action 'self'" };
     function json(code, value) { res.writeHead(code, { ...headers, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(value)); }
     try {
+      if (req.url.length > 8192) return json(414, { error: '網址太長了。' });
       const url = new URL(req.url, 'http://localhost');
       if (!url.pathname.startsWith('/api/')) {
         const files = { '/': ['index.html','text/html'], '/app.js': ['app.js','text/javascript'], '/i18n.js': ['i18n.js','text/javascript'], '/water.js': ['water.js','text/javascript'], '/listen.js': ['listen.js','text/javascript'], '/card-drag.js': ['card-drag.js','text/javascript'], '/style.css': ['style.css','text/css'], '/logo.png': ['logo.png','image/png'], '/favicon.svg': ['favicon.svg','image/svg+xml'] };
@@ -29,6 +34,13 @@ export function createApp(dbPath = resolve(root, 'data/letters.sqlite')) {
         res.writeHead(200, { ...headers, 'Content-Type': file[1] + '; charset=utf-8' });
         return res.end(readFileSync(resolve(root, 'public', file[0])));
       }
+      if (!allowedApiMethod(url.pathname, req.method)) return json(404, { error: '找不到這個頁面。' });
+      const admission = admit(clientAddress(req, { VERCEL: '0' }), req.method);
+      if (admission.status) {
+        res.setHeader('Retry-After', String(admission.retryAfter));
+        return json(admission.status, { error: '請稍後再試。' });
+      }
+      release = admission.release;
       let token = /(?:^|; )visitor=([a-f0-9]{64})(?:;|$)/.exec(req.headers.cookie || '')?.[1];
       if (!token) {
         token = randomBytes(32).toString('hex');
@@ -68,8 +80,12 @@ export function createApp(dbPath = resolve(root, 'data/letters.sqlite')) {
         if (violation) return json(422, { code: violation, error: '內容不符合公開留言規則。' });
         const key = req.socket.remoteAddress;
         const now = Date.now();
-        if (limits.size > 10000) for (const [k,v] of limits) if (now-v.start > 3600000) limits.delete(k);
+        if (now-lastWriteSweep >= 60000) {
+          for (const [k,v] of limits) if (now-v.start >= 3600000) limits.delete(k);
+          lastWriteSweep = now;
+        }
         const rate = limits.get(key);
+        if (!rate && limits.size >= 10000) { res.setHeader('Retry-After','60'); return json(503,{error:'請稍後再試。'}); }
         if (rate && now-rate.start < 3600000 && rate.count >= 20) return json(429, { error: '今日寫咗好多，稍後再試。' });
         limits.set(key, rate && now-rate.start < 3600000 ? { ...rate, count: rate.count+1 } : { start: now, count: 1 });
         const id = randomBytes(16).toString('hex');
@@ -101,7 +117,12 @@ export function createApp(dbPath = resolve(root, 'data/letters.sqlite')) {
       }
       json(404, { error: '找不到這個頁面。' });
     } catch (error) { console.error(error.message); if (!res.headersSent) json(500,{error:'暫時未能完成，請稍後再試。'}); else res.end(); }
+    finally { release(); }
   });
+  server.requestTimeout = 10000;
+  server.headersTimeout = 5000;
+  server.keepAliveTimeout = 5000;
+  server.maxHeadersCount = 50;
   server.on('close', () => db.close());
   return server;
 }
