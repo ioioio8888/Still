@@ -27,6 +27,7 @@ body:is([data-view="wall"],[data-view="write"]) :is(.header,footer,.language-con
 body:is([data-view="wall"],[data-view="write"]) #main{pointer-events:none}
 .page-ink,.listen-card,.listen-actions,.listen-options,.listen-rest,.writing-paper{pointer-events:auto}
 .ink-hint{text-align:center;font-size:12px;color:var(--muted);margin:12px 0 0;pointer-events:none}
+.listen-hint,.ink-hint,.listen-options,.footer-note,.footer-controls .text-button{font-weight:700}
 .write-heading .ink-hint{text-align:left;margin-top:12px;font-size:12px}
 body:is([data-view="wall"],[data-view="write"]) .footer-controls{flex-wrap:wrap;gap:12px 20px}
 .listening{position:relative;isolation:isolate;overflow:clip;min-height:700px;padding:28px 0 26px}
