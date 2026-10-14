@@ -1,4 +1,3 @@
-import { attachWater } from './water.js';
 import { attachCardDrag } from './card-drag.js';
 
 const session = { current: null, seen: [] };
@@ -6,11 +5,11 @@ const session = { current: null, seen: [] };
 export function attachListening(main, { api, t, escape, icon, reaction, bindCards, moodLabel }) {
   let disposed = false, loading = false, moving = false, cleanupDrag = () => {};
   const tr = key => escape(t(key));
-  main.innerHTML = `<section class="listening"><div class="listen-ink" aria-hidden="true"><canvas id="listen-water" tabindex="-1"></canvas></div>
+  main.innerHTML = `<section class="listening">
     <header class="listen-heading"><h1>${tr('listenTitle')}</h1><p>${tr('listenIntro')}</p></header>
     <div class="listen-stage" id="listen-stage" aria-live="polite" aria-busy="true"></div>
+    <p class="ink-hint" id="water-hint">${tr('waterHint')}</p>
     <details class="listen-options"><summary>${tr('listenOptions')}</summary><a href="#archive">${tr('listenArchive')}</a></details></section>`;
-  const stopWater = attachWater(document.querySelector('#listen-water'), document.querySelector('#motion-toggle'), t);
   const stage = document.querySelector('#listen-stage');
   const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   function markSeen(id) {
@@ -84,5 +83,5 @@ export function attachListening(main, { api, t, escape, icon, reaction, bindCard
     if (session.current?.id === event.target.dataset.id) advance(1);
   });
   if (session.current) render(); else fetchNext();
-  return () => { disposed = true; cleanupDrag(); stopWater(); };
+  return () => { disposed = true; cleanupDrag(); };
 }

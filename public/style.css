@@ -16,9 +16,18 @@ html[data-language="en"] .brand,html[data-language="en"] .footer-brand{letter-sp
 html[data-language="en"]{--sans:Arial,"Helvetica Neue","Microsoft JhengHei",sans-serif}
 
 /* One quiet page of a letter, with ink moving behind the paper. */
+#main{position:relative;isolation:isolate}
+.header,footer{position:relative;z-index:1}
+.page-ink{position:fixed;inset:0;z-index:-1}
+.page-ink canvas{display:block;width:100%;height:100%;cursor:crosshair;touch-action:none}
+.page-ink canvas:focus-visible{outline-offset:-6px}
+body:is([data-view="wall"],[data-view="write"]) #main{pointer-events:none}
+.page-ink,.listen-card,.listen-actions,.listen-options,.listen-rest,.writing-paper{pointer-events:auto}
+.ink-hint{text-align:center;font-size:12px;color:var(--muted);margin:12px 0 0;pointer-events:none}
+.write-heading .ink-hint{text-align:left;margin-top:12px;font-size:12px}
+body:is([data-view="wall"],[data-view="write"]) .footer-controls{flex-wrap:wrap;gap:12px 20px}
 .listening{position:relative;isolation:isolate;overflow:clip;min-height:700px;padding:28px 0 26px}
-.listen-ink{position:absolute;inset:85px -54px 32px;z-index:-1;pointer-events:none;opacity:.68;overflow:hidden}
-.listen-ink canvas{display:block;width:100%;height:100%;min-height:580px;transform:scaleX(1.65);pointer-events:none}
+
 .listen-heading{text-align:center;position:relative;margin:0 auto 24px}
 .listen-heading h1{font-size:clamp(26px,3.2vw,39px);line-height:1.5;margin:0 0 8px}
 .listen-heading p{font-size:14px;color:var(--muted);margin:0}
@@ -46,4 +55,4 @@ html[data-language="en"]{--sans:Arial,"Helvetica Neue","Microsoft JhengHei",sans
 .rest-mark .brand-mark{width:58px;height:58px;opacity:.65}
 .listen-loading{text-align:center;padding:150px 20px;color:var(--muted)}
 .archive-back{display:inline-block;margin-bottom:14px}
-@media(max-width:760px){.listening{padding:30px 0 20px;min-height:710px}.listen-heading{margin-bottom:25px}.listen-heading h1{font-size:25px}.listen-heading p{font-size:13px}.listen-ink{inset:75px -20px 40px;opacity:.55}.listen-stage{min-height:480px}.listen-card{padding:22px 25px 16px;min-height:355px;border-bottom-right-radius:32px}.listen-body{font-size:24px;min-height:190px;margin:24px 0}.listen-body.long-note{font-size:20px;line-height:1.8}.listen-actions{gap:12px;margin-top:24px}.listen-actions .reaction{padding:12px 17px}.listen-actions .button{padding:12px 17px;gap:12px}.listen-hint{font-size:11px}.listen-options{margin-top:10px}}
+@media(max-width:760px){.listening{padding:30px 0 20px;min-height:710px}.listen-heading{margin-bottom:25px}.listen-heading h1{font-size:25px}.listen-heading p{font-size:13px}.listen-stage{min-height:480px}.listen-card{padding:22px 25px 16px;min-height:355px;border-bottom-right-radius:32px}.listen-body{font-size:24px;min-height:190px;margin:24px 0}.listen-body.long-note{font-size:20px;line-height:1.8}.listen-actions{gap:12px;margin-top:24px}.listen-actions .reaction{padding:12px 17px}.listen-actions .button{padding:12px 17px;gap:12px}.listen-hint{font-size:11px}.listen-options{margin-top:10px}}

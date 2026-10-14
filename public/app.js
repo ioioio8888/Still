@@ -61,7 +61,7 @@ function shell() {
  document.documentElement.lang=locales[language]; document.documentElement.dataset.language=language;
  document.title=t('title');document.querySelector('meta[name="description"]').content=t('description');
  document.querySelector('.skip-link').textContent=t('skip');
- document.querySelector('.brand').setAttribute('aria-label',t('brand')+' · '+t('home'));
+ document.querySelector('.brand').setAttribute('aria-label',t('brand')+' · '+t('wall'));
  document.querySelector('.brand').innerHTML=icon.mark+'<span>'+text('brand')+'</span>';
  document.querySelector('nav').setAttribute('aria-label',t('nav'));
  document.querySelectorAll('[data-nav]').forEach(link=>link.innerHTML=text(link.dataset.nav==='write'?'write':link.dataset.nav)+(link.dataset.nav==='write'?icon.arrow:''));
@@ -69,6 +69,7 @@ function shell() {
  document.querySelector('.close').setAttribute('aria-label',t('close'));
  document.querySelector('.footer-brand').innerHTML=icon.mark+'<span>'+text('brand')+'</span>';
  document.querySelector('.footer-note').textContent=t('footer');document.querySelector('#about-button').textContent=t('about');
+ document.querySelector('#clear-water').textContent=t('clearWater');
  document.querySelector('#motion-toggle').textContent=t('motionOn');
 }
 document.querySelector('#language').onchange=event=>{
@@ -78,10 +79,6 @@ document.querySelector('#language').onchange=event=>{
  if(modal.open)closeDialog();document.querySelector('#toast').classList.remove('visible');shell();route(false);
 };
 document.querySelector('#about-button').onclick=()=>showDialog(()=>`<h2>${text('aboutTitle')}</h2><p>${text('aboutBody')}</p><h3>${text('privacyTitle')}</h3><p>${text('privacyBody')}</p><p>${text('cookieBody')}</p><h3>${text('reportTitle')}</h3><p>${text('careBody')}</p>`);
-function home() {
- main.innerHTML=`<section class="hero"><div class="hero-copy"><h1><span>${text('hero1')}</span><span>${text('hero2')}</span></h1><p class="hero-description">${lines('intro')}</p><div class="hero-actions"><a class="button primary" href="#write">${text('writeMine')}${icon.arrow}</a><a class="quiet-link" href="#wall">${text('readOthers')}</a></div><p class="anonymous-note">${text('anonymousNote')}</p></div><div class="water-space"><canvas id="water" tabindex="0" role="button" aria-label="${text('waterLabel')}"></canvas><button id="clear-water" class="clear-water text-button">${text('clearWater')}</button><p class="water-caption"><span class="pointer-hint">${text('waterHint')}</span><span class="touch-hint">${text('waterTouch')}</span></p></div><p class="hero-aside">${text('aside')}</p></section><section class="invitation"><div class="invitation-art" aria-hidden="true">${icon.mark}</div><div><h2>${text('invitation')}</h2><p>${lines('inviteBody')}</p></div><a class="circle-link" href="#wall" aria-label="${text('readOthers')}">${icon.arrow}</a></section>`;
- cleanupWater=attachWater(document.querySelector('#water'),document.querySelector('#motion-toggle'),t);
-}
 function reaction(letter) {
  const supported=letter.reactions?.includes('heard');
  return `<div class="reactions"><button class="reaction ${supported?'selected':''}" data-id="${escape(letter.id)}" ${supported?'disabled':''}>${supported?icon.check:icon.hear}<span>${text(supported?'heardDone':'heard')}</span></button></div>`;
@@ -129,7 +126,7 @@ function bindCards() {
  });
 }
 function write() {
- main.innerHTML=`<section class="page-heading write-heading"><h1>${text('writeTitle')}</h1><p>${text('writeIntro')}</p></section><form class="writing-paper" id="write-form" novalidate><label class="sr-only" for="body">${text('bodyLabel')}</label><div class="paper-top">${text('dear')}${icon.mark}</div><textarea id="body" maxlength="200" placeholder="${text('placeholder')}" aria-describedby="form-error" required>${escape(draft)}</textarea><div class="paper-bottom"><span>${text('pauseHint')}</span><span id="char-count">${draft.length} / 200</span></div><p id="form-error" class="form-error" role="alert"></p><div class="write-options"><label for="mood">${text('mood')}</label><select id="mood">${canonicalMoods.slice(1).map(m=>`<option value="${escape(m)}" ${m===draftMood?'selected':''}>${escape(moodLabel(m))}</option>`).join('')}</select></div><fieldset class="visibility"><legend>${text('visibility')}</legend>${['public','private'].map(value=>`<label><input type="radio" name="visibility" value="${value}" ${draftVisibility===value?'checked':''}><span>${text(value)}<small>${text(value+'Help')}</small></span></label>`).join('')}</fieldset><p class="privacy-hint" id="privacy-hint">${text(draftVisibility+'Warning')}</p><p class="policy-note" id="policy-note" ${draftVisibility==='private'?'hidden':''}>${text('policy')}</p><div class="submit-row"><span>${text('anonymousNote')}</span><button class="button primary" type="submit">${text('preview')}${icon.arrow}</button></div></form>`;
+ main.innerHTML=`<section class="page-heading write-heading"><h1>${text('writeTitle')}</h1><p>${text('writeIntro')}</p><p class="ink-hint" id="water-hint">${text('waterHint')}</p></section><form class="writing-paper" id="write-form" novalidate><label class="sr-only" for="body">${text('bodyLabel')}</label><div class="paper-top">${text('dear')}${icon.mark}</div><textarea id="body" maxlength="200" placeholder="${text('placeholder')}" aria-describedby="form-error" required>${escape(draft)}</textarea><div class="paper-bottom"><span>${text('pauseHint')}</span><span id="char-count">${draft.length} / 200</span></div><p id="form-error" class="form-error" role="alert"></p><div class="write-options"><label for="mood">${text('mood')}</label><select id="mood">${canonicalMoods.slice(1).map(m=>`<option value="${escape(m)}" ${m===draftMood?'selected':''}>${escape(moodLabel(m))}</option>`).join('')}</select></div><fieldset class="visibility"><legend>${text('visibility')}</legend>${['public','private'].map(value=>`<label><input type="radio" name="visibility" value="${value}" ${draftVisibility===value?'checked':''}><span>${text(value)}<small>${text(value+'Help')}</small></span></label>`).join('')}</fieldset><p class="privacy-hint" id="privacy-hint">${text(draftVisibility+'Warning')}</p><p class="policy-note" id="policy-note" ${draftVisibility==='private'?'hidden':''}>${text('policy')}</p><div class="submit-row"><span>${text('anonymousNote')}</span><button class="button primary" type="submit">${text('preview')}${icon.arrow}</button></div></form>`;
  const body=document.querySelector('#body');body.oninput=()=>{draft=body.value;document.querySelector('#char-count').textContent=draft.length+' / 200';body.removeAttribute('aria-invalid');document.querySelector('#form-error').textContent='';};
  document.querySelector('#mood').onchange=event=>draftMood=event.target.value;
  document.querySelectorAll('[name="visibility"]').forEach(radio=>radio.onchange=()=>{draftVisibility=radio.value;document.querySelector('#privacy-hint').textContent=t(draftVisibility+'Warning');document.querySelector('#policy-note').hidden=draftVisibility==='private';});
@@ -147,11 +144,18 @@ function write() {
 }
 function done(){main.innerHTML=`<section class="done"><div class="settled-mark">${icon.mark}</div><h1>${lines('savedTitle')}</h1><p>${lines('savedIntro')}</p><div class="hero-actions"><a class="button primary" href="#mine">${text('backMine')}${icon.arrow}</a><a class="quiet-link" href="#wall">${text('readOthers')}</a></div></section>`;}
 function route(scroll=true) {
- if(location.hash==='#main'){main.focus();return;}
- cleanupWater();cleanupWater=()=>{};const view=location.hash.slice(1)||'home';++generation;page=0;
- document.body.dataset.view=view;document.querySelector('#motion-toggle').hidden=view!=='home'&&view!=='wall';
+ if(location.hash==='#main'&&main.hasChildNodes()){main.focus();return;}
+ cleanupWater();cleanupWater=()=>{};const requested=location.hash.slice(1);const view=['archive','mine','write','done'].includes(requested)?requested:'wall';++generation;page=0;
+ if(requested==='home')history.replaceState(history.state,'',location.pathname+location.search+'#wall');
+ const inkView=view==='wall'||view==='write';
+ document.body.dataset.view=view;document.querySelector('#motion-toggle').hidden=!inkView;document.querySelector('#clear-water').hidden=!inkView;
  document.querySelectorAll('[data-nav]').forEach(a=>{if(a.dataset.nav===view||(view==='archive'&&a.dataset.nav==='wall'))a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
- if(view==='wall')cleanupWater=attachListening(main,{api,t,escape,icon,reaction,bindCards,moodLabel});else if(view==='archive'||view==='mine')wall(view==='mine');else if(view==='write')write();else if(view==='done')done();else home();
+ if(view==='wall')cleanupWater=attachListening(main,{api,t,escape,icon,reaction,bindCards,moodLabel});else if(view==='archive'||view==='mine')wall(view==='mine');else if(view==='write')write();else if(view==='done')done();
+ if(inkView){
+  main.insertAdjacentHTML('afterbegin',`<div class="page-ink"><canvas id="background-water" tabindex="0" role="button" aria-label="${text('waterLabel')}" aria-describedby="water-hint"></canvas></div>`);
+  const stopView=cleanupWater,stopInk=attachWater(document.querySelector('#background-water'),document.querySelector('#motion-toggle'),t);
+  cleanupWater=()=>{stopView();stopInk();};
+ }
  if(scroll){window.scrollTo(0,0);main.focus({preventScroll:true});}
 }
 window.addEventListener('hashchange',()=>route());window.addEventListener('beforeunload',event=>{if(draft.trim()||busy){event.preventDefault();event.returnValue='';}});
