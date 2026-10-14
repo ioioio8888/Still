@@ -18,11 +18,9 @@ html[data-language="en"]{--sans:Arial,"Helvetica Neue","Microsoft JhengHei",sans
 /* One quiet page of a letter, with ink moving behind the paper. */
 #main{position:relative;isolation:isolate}
 .header,footer{position:relative;z-index:1}
-/* Keep reading surfaces opaque so ink cannot reduce text contrast. */
-body:is([data-view="wall"],[data-view="write"]) :is(.header,footer){background:var(--bg)}
-.listen-heading{width:fit-content;max-width:100%;padding-inline:12px;background:var(--bg)}
-.listening :is(.listen-hint,.ink-hint,.listen-options,.listen-loading){width:fit-content;max-width:100%;margin-inline:auto;padding-inline:8px;background:var(--bg)}
-.write-heading :is(h1,p){width:fit-content;max-width:100%;padding-inline:8px;margin-left:-8px;background:var(--bg)}
+/* A soft white shadow follows the lettering without covering the ink. */
+body:is([data-view="wall"],[data-view="write"]){--ink-reading-shadow:0 1px 2px #fff,0 0 6px #fff,0 0 14px #ffffffd9}
+body:is([data-view="wall"],[data-view="write"]) :is(.header,footer,.language-control select,.footer-controls button,.listen-heading,.listen-hint,.ink-hint,.listen-options,.listen-loading,.write-heading){text-shadow:var(--ink-reading-shadow)}
 .page-ink{position:fixed;inset:0;z-index:-1}
 .page-ink canvas{display:block;width:100%;height:100%;cursor:crosshair;touch-action:none}
 .page-ink canvas:focus-visible{outline-offset:-6px}
