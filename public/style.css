@@ -21,7 +21,7 @@ html[data-language="en"]{--sans:Arial,"Helvetica Neue","Microsoft JhengHei",sans
 /* A soft white shadow follows the lettering without covering the ink. */
 body:is([data-view="wall"],[data-view="write"]){--ink-reading-shadow:0 1px 2px #fff,0 0 6px #fff,0 0 14px #ffffffd9}
 body:is([data-view="wall"],[data-view="write"]) :is(.header,footer,.language-control select,.footer-controls button,.listen-heading,.listen-hint,.ink-hint,.listen-options,.listen-loading,.write-heading){text-shadow:var(--ink-reading-shadow)}
-.page-ink{position:fixed;inset:0;z-index:-1}
+.page-ink{position:fixed;inset:0;z-index:-1;opacity:.5}
 .page-ink canvas{display:block;width:100%;height:100%;cursor:crosshair;touch-action:none}
 .page-ink canvas:focus-visible{outline-offset:-6px}
 body:is([data-view="wall"],[data-view="write"]) #main{pointer-events:none}
