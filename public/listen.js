@@ -8,6 +8,7 @@ export function attachListening(main, { api, t, escape, icon, reaction, bindCard
   main.innerHTML = `<section class="listening">
     <header class="listen-heading"><h1>${tr('listenTitle')}</h1><p>${tr('listenIntro')}</p></header>
     <div class="listen-stage" id="listen-stage" aria-live="polite" aria-busy="true"></div>
+    <a class="listen-compose button primary" href="#write">${tr('write')}${icon.arrow}</a>
     <p class="ink-hint" id="water-hint">${tr('waterHint')}</p>
     <details class="listen-options"><summary>${tr('listenOptions')}</summary><a href="#archive">${tr('listenArchive')}</a></details></section>`;
   const stage = document.querySelector('#listen-stage');
@@ -39,7 +40,7 @@ export function attachListening(main, { api, t, escape, icon, reaction, bindCard
   function empty() {
     const seen = session.seen.length > 0;
     stage.innerHTML = `<div class="listen-rest"><div class="rest-mark">${icon.mark}</div><h2>${tr(seen ? 'listenEnd' : 'listenEmpty')}</h2><p>${tr(seen ? 'listenEndBody' : 'listenEmptyBody')}</p>
-      ${seen ? `<button class="button secondary" id="listen-again">${tr('listenAgain')}</button>` : `<a class="button primary" href="#write">${tr('write')}</a>`}</div>`;
+      ${seen ? `<button class="button secondary" id="listen-again">${tr('listenAgain')}</button>` : ''}</div>`;
     stage.querySelector('#listen-again')?.addEventListener('click', () => { session.seen = []; fetchNext(true); });
   }
   async function fetchNext(focus = false) {
